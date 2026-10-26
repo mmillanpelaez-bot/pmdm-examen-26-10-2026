@@ -26,26 +26,45 @@ var llegada: Boolean = false
 // true si se detecta un fallo en el mecanismo
 var fallo: Boolean = false
 
+// ---------------------------------------------------------------
+// Funciones de cada estado
+// ---------------------------------------------------------------
+
+/** Pone la botonera interior a "sin pulsar". */
+fun limpiarBotonera() {
+    nivel_0 = false
+    nivel_1 = false
+}
+
+/** Acciones del estado Idle. */
+fun accionesIdle() {
+    nivel_actual = NIVEL_0
+}
+
+/** Acciones del estado MovingUP. */
+fun accionesMovingUP() {
+    nivel_actual = NIVEL_MOVIMIENTO
+}
+
+/** Acciones del estado MovingDOWN. */
+fun accionesMovingDOWN() {
+    nivel_actual = NIVEL_MOVIMIENTO
+}
+
+/** Acciones del estado Error. */
+fun accionesError() {
+    nivel_actual = NIVEL_ERROR
+}
+
 /**
  * Gestiona el cambio de estados
  */
 fun gestor(): Int {
     when (estado_acual) {
-        is Estados.Idle -> {
-            nivel_actual = 0
-            return nivel_actual
-        }
-        is Estados.MovingUP -> {
-            nivel_actual = 2
-            return nivel_actual
-        }
-        is Estados.MovingDOWN -> {
-            nivel_actual = 2
-            return nivel_actual
-        }
-        is Estados.Error -> {
-            nivel_actual = -1
-            return nivel_actual
-        }
+        is Estados.Idle -> accionesIdle()
+        is Estados.MovingUP -> accionesMovingUP()
+        is Estados.MovingDOWN -> accionesMovingDOWN()
+        is Estados.Error -> accionesError()
     }
+    return nivel_actual
 }
