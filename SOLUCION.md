@@ -168,6 +168,8 @@ Hay **41 tests unitarios** en `GestorTest.kt`. Antes y después de cada uno se r
 | Funciones auxiliares | `iniciarSubida`, `iniciarBajada`, `finalizarMovimiento`, `activarError` |
 | Recorridos completos | Subir y bajar, fallo a mitad de la subida y varios viajes seguidos |
 
+>![captura del resultado de los tests](img/img.png)
+
 Para ejecutarlos:
 
 ```bash
