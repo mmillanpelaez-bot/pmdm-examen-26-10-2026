@@ -27,7 +27,7 @@ var llegada: Boolean = false
 var fallo: Boolean = false
 
 // ---------------------------------------------------------------
-// Funciones de cada estado
+// Funciones auxiliares de las transiciones
 // ---------------------------------------------------------------
 
 /** Pone la botonera interior a "sin pulsar". */
@@ -36,35 +36,96 @@ fun limpiarBotonera() {
     nivel_1 = false
 }
 
-/** Acciones del estado Idle. */
-fun accionesIdle() {
-    nivel_actual = NIVEL_0
+/** Idle -> MovingUP */
+fun iniciarSubida() {
+    estado_acual = Estados.MovingUP
+    nivel_actual = NIVEL_MOVIMIENTO
 }
 
-/** Acciones del estado MovingUP. */
+/** Idle -> MovingDOWN */
+fun iniciarBajada() {
+    estado_acual = Estados.MovingDOWN
+    nivel_actual = NIVEL_MOVIMIENTO
+}
+
+/** MovingUP / MovingDOWN -> Idle, el mecanismo ya ha llegado al nivel de destino */
+fun finalizarMovimiento(nivelDestino: Int) {
+    estado_acual = Estados.Idle
+    nivel_actual = nivelDestino
+    llegada = false
+}
+
+/** Cualquier estado -> Error */
+fun activarError() {
+    estado_acual = Estados.Error
+    nivel_actual = NIVEL_ERROR
+}
+
+// ---------------------------------------------------------------
+// Funciones de cada estado (aquí se deciden las transiciones)
+// ---------------------------------------------------------------
+
+/**
+ * Idle: está parado en el nivel 0 o en el nivel 1.
+ * - Si está en el nivel 0 y se pulsa nivel_1 -> MovingUP
+ * - Si está en el nivel 1 y se pulsa nivel_0 -> MovingDOWN
+ * - Si se pulsa el botón del nivel en el que ya está no hace nada
+ */
+fun accionesIdle() {
+    if (nivel_actual == NIVEL_0 && nivel_1) {
+        iniciarSubida()
+    } else if (nivel_actual == NIVEL_1 && nivel_0) {
+        iniciarBajada()
+    }
+}
+
+/**
+ * MovingUP: está subiendo, cuando llega al nivel 1 vuelve a Idle.
+ */
 fun accionesMovingUP() {
     nivel_actual = NIVEL_MOVIMIENTO
+    if (llegada) {
+        finalizarMovimiento(NIVEL_1)
+    }
 }
 
-/** Acciones del estado MovingDOWN. */
+/**
+ * MovingDOWN: está bajando, cuando llega al nivel 0 vuelve a Idle.
+ */
 fun accionesMovingDOWN() {
     nivel_actual = NIVEL_MOVIMIENTO
+    if (llegada) {
+        finalizarMovimiento(NIVEL_0)
+    }
 }
 
-/** Acciones del estado Error. */
+/**
+ * Error: no sale nunca de este estado (Error -> Error),
+ * da igual lo que se pulse en la botonera.
+ */
 fun accionesError() {
+    estado_acual = Estados.Error
     nivel_actual = NIVEL_ERROR
 }
 
 /**
- * Gestiona el cambio de estados
+ * Gestiona el cambio de estados.
+ * Cada vez que se llama se evalúan las transiciones del estado actual
+ * y devuelve el valor de nivel_actual.
  */
 fun gestor(): Int {
-    when (estado_acual) {
-        is Estados.Idle -> accionesIdle()
-        is Estados.MovingUP -> accionesMovingUP()
-        is Estados.MovingDOWN -> accionesMovingDOWN()
-        is Estados.Error -> accionesError()
+    // el fallo tiene prioridad sobre todo lo demás
+    if (fallo && estado_acual !is Estados.Error) {
+        activarError()
+    } else {
+        when (estado_acual) {
+            is Estados.Idle -> accionesIdle()
+            is Estados.MovingUP -> accionesMovingUP()
+            is Estados.MovingDOWN -> accionesMovingDOWN()
+            is Estados.Error -> accionesError()
+        }
     }
+    // los botones se "consumen" en cada ciclo
+    limpiarBotonera()
     return nivel_actual
 }

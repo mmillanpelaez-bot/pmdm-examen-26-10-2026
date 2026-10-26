@@ -12,9 +12,9 @@ class GestorTest {
     }
 
     @Test
-    fun `gestor reinicia el nivel cuando el estado es Idle`() {
+    fun `gestor mantiene el nivel cuando el estado es Idle`() {
         estado_acual = Estados.Idle
-        nivel_actual = 5
+        nivel_actual = 0
 
         assertEquals(0, gestor())
         assertEquals(0, nivel_actual)
